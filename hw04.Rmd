@@ -1,0 +1,114 @@
+---  
+title: "Homework 04: Tidy data and joins"  
+author: "Adam Mattsson"  
+date: "`r format(Sys.Date())`"
+output: github_document
+keep_md: TRUE
+message: FALSE
+Warnings: FALSE
+---
+
+## Data Reshaping Prompts (and relationship to aggregation)
+**Problem:** You have data in one “shape” but you wish it were in another. Usually this is because the alternative shape is superior for presenting a table, making a figure, or doing aggregation and statistical analysis.
+
+**Solution:** Reshape your data. For simple reshaping, `gather()` and `spread()` from tidyr will suffice. Do the thing that is possible / easier now that your data has a new shape.
+
+### Activity 2
+Make a tibble with one row per year and columns for life expectancy for two or more countries: 
+
+- Use `knitr::kable()` to make this table look pretty in your rendered homework.
+- Take advantage of this new data shape to **scatterplot** life expectancy for one country against that of another.
+
+For this task, let's compare life expectancy for three countries. I will use the `filter()` to select the countries of intereset and then I'll execute `select()` to retain appropriate columns. But first, let's load required packages and bring in rectangular data. 
+
+```{r load_packages}
+suppressWarnings(suppressMessages(library(gapminder))) 
+suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(tidyverse)))
+suppressWarnings(suppressMessages(library(knitr)))
+```
+
+Now, let's create this new data frame with the countries of interest and select the right varaibles
+```{r create_new_dataframe}
+filt_gapminder = gapminder %>% #create new varaible
+  filter(country %in% c("Sweden", "Rwanda")) %>% #filter out Sweden and Rwanda from original gapminder dataset
+  select(country, year, lifeExp) #select varaibles
+
+knitr::kable(head(filt_gapminder, n=5)) #output result as table
+```
+
+Perfect, now we have a new data frame, only containing antries from Sweden and Rwanda. The selected variables are `gapminder$country`, `gapminder$lifeExp` and `gapminder$year`. 
+
+The next task of this assignment is to reshape the data. The goal is to obtain one year per row were the columns are life expectancy for the two selected countries. The `spread()` function is called in order to convert a single column into multiple columns.
+```{r reshape_dataframe}
+refilt_gap = filt_gapminder %>% #create new dataframe
+        spread(country,lifeExp) #use spread function to convert a single column in to multiple
+
+#present result in table
+knitr::kable(refilt_gap, col.names = c('Year','Life Expectancy in Rwanda', 'Life Expectancy in Sweden'),
+        align = 'c',
+        format = 'markdown')
+```
+
+Sucess,the data has now been reshaped to one year per row were the columns are life expectancy for the two selected countries.
+
+Let's plot the difference in lifeExp between Sweden and Rwanda in a scatterplot usining ggplot.
+```{r ggplot_lifeExp}
+filt_gapminder %>% ggplot(aes(x = year, y = lifeExp, colour = country)) + 
+    geom_point(colour = "black", size = 3, shape = 18) + #add geom_point for each country
+    geom_smooth(method="lm", se = FALSE) + #add geom_smooth for both countries
+  theme_minimal() + #specify theme
+      labs(x = "Year", y = "Life Expectancy", title = "Life Expectancies for Sweden and Rwanda", caption = "Based on data from the Gapminder dataset") #adding lables
+```
+
+Awesome, the generated plot is perfect for comparing life expectancy for the two selected countries. We can see that life expectancy for Sweden is considderably higher compared to Rwanda. Notice the early 90's entry for Rwanda, this entry is most likely reflecting the genocide that took place in the Rwanda in the early ninties. 
+
+## Join Prompts (join, merge, look up)
+**Problem:** You have two data sources and you need info from both in one new data object.
+
+**Solution:** Perform a join, which borrows terminology from the database world, specifically SQL.
+
+### Activity 1
+Create a second data frame, complementary to Gapminder. Join this with (part of) Gapminder using a dplyr join function and make some observations about the process and result. Explore the different types of joins. Examples of a second data frame you could build:
+
+- One row per country, a country variable and one or more variables with extra info, such as language spoken, NATO membership, national animal, or capitol city. If you really want to be helpful, you could attempt to make a pull request to resolve this issue, where I would like to bring ISO country codes into the gapminder package.
+
+- One row per continent, a continent variable and one or more variables with extra info, such as northern versus southern hemisphere.
+
+For this task I chosed to create a second data frame (complementary to gapminder). The second data frame contains information of the spoken language in a specific country. This new dataframe will be merged with gapminder data exploring different join functions. 
+```{r create_new_dataframe_comp_to_gap}
+country <- c("Sweden", "Canada", "Spain", "Germany", "Brazil", "Mexico") #Specifying countries in new data fraame
+language <- c("Swedish", "English", "Spanish", "German", "Portuguese", "Spanish") #adding coresponding spoken languages for each country
+gap_comp <- data.frame(country, language) #creating new dataframe, complementary to gapminder
+
+#presenting new dataframe as a table.
+knitr::kable(gap_comp, col.names = c('Country','Spoken language'),
+        align = 'c',
+        format = 'markdown')
+```
+
+Now that we have this second complementary dataframe, let's join it with the gapminder data. First, I need to investigate if all the countries from the `gapminder`data set are present in the second dataframe. This task is tackled by calling the `semi_join()` function. The returned table shows what countries in `gapminder` that we have data for in the created second dataframe.
+```{r semi_join}
+semi_join <- semi_join(gapminder, gap_comp, by = c("country","country")) #Return all rows from x where there are matching values in y, keeping just columns from x.
+knitr::kable(head(semi_join)) #output as table
+```
+
+As expected, the returned table contains merged information from the complementary dataframe. Spoken language is added to every row in gapminder were there's information available. Next up is to investigate what countries from `gapminder` data that we don't have any information in regards of spoken language. This problem is adressed utilizing the `anti_join()` function. 
+```{r anti_join}
+anti_join <- anti_join(gapminder, gap_comp, by = c("country","country")) #Return all rows from x where there are not matching values in y, keeping just columns from x.
+knitr::kable(head(anti_join)) #output as table
+```
+
+This returns a list of all of the countries in gapminder dataframe where we don't have any information on spoken language (in complementary dataframe). Next up is to add the information about the spoken language that corresponds to a specific country. This is achieved by calling the inner_join()` function, as such:
+```{r inner_join}
+inner_join <- inner_join(gapminder, gap_comp, by = c("country","country")) #Return all rows from x where there are matching values in y, and all columns from x and y. 
+knitr::kable(head(inner_join)) #output as table
+```
+
+It's also possible to use the `full_join()`function. By calling this functions it will return all rows and all columns from both x and y. Where there are not matching values, returns NA for the one missing (mutating join).
+```{r full_join}
+full_join <- full_join(gapminder, gap_comp, by = c("country","country")) #Return all rows and all columns from both x and y. Where there are not matching values, returns NA for the one missing. This is a mutating join.
+knitr::kable(head(full_join)) #output as table
+```
+
+As expected, we see NA's for countries that had no information in terms of spoken language in the gapminder complementary dataframe. 
