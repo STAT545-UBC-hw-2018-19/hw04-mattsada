@@ -6,7 +6,7 @@ Welcome, this is my personal repository for the fourth assignment in **STAT545**
 |[Homework 1](https://github.com/STAT545-UBC-students/hw01-mattsada/blob/master/hw01_gapminder.md)|September 18, 2018|September 24, 2018| [Review 1](https://github.com/STAT545-UBC-students/hw01-seraphinearnold/issues/2), [Review 2](https://github.com/STAT545-UBC-students/hw01-alorentzian/issues/1)|
 |[Homework 2](https://github.com/STAT545-UBC-students/hw02-mattsada)|September 25, 2018|October 01, 2018  | [Review 1](https://github.com/STAT545-UBC-students/hw02-CeciliaLe07/issues/1), [Review 2](https://github.com/STAT545-UBC-students/hw02-RyanGao67/issues/2)|
 |[Homework 3](https://github.com/STAT545-UBC-students/hw03-mattsada)|October 2, 2018|October 08, 2018  | [Review 1](https://github.com/STAT545-UBC-students/hw03-RetoSterchi/issues/2), [Review 2](https://github.com/STAT545-UBC-students/hw03-janehuang1647/issues/2)|
-|[Homework 4](https://github.com/STAT545-UBC-students/hw04-mattsada)|October 2, 2018|October 08, 2018  | [Review 1](), [Review 2]()|
+|[Homework 4](https://github.com/STAT545-UBC-students/hw04-mattsada)|October 9, 2018|October 15, 2018  | [Review 1](), [Review 2]()|
 
 ## Useful resources
 
